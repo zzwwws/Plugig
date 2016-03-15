@@ -1,0 +1,48 @@
+buildscript {
+    apply from: 'script.gradle', to: buildscript
+}
+
+import com.android.build.gradle.internal.tasks.BaseTask
+
+import java.lang.reflect.Field
+
+ext {
+    copyBaseTask = { BaseTask src, BaseTask dest ->
+        copyBaseTask(src, dest)
+    }
+
+    loadProperties = { String name ->
+        loadProperties(name)
+    }
+}
+
+void copyBaseTask(BaseTask src, BaseTask dest) {
+    for (Field field : BaseTask.class.getDeclaredFields()) {
+        if (field.name.equals("plugin") || field.name.equals("androidBuilder")) {
+            field.setAccessible(true)
+            field.set(dest, field.get(src))
+        }
+    }
+}
+
+Properties loadProperties(String name) {
+    Properties properties = new Properties()
+
+    InputStream is = null;
+    try {
+        is = new FileInputStream(name)
+        properties.load(is)
+    } catch (Throwable tr) {
+//        tr.printStackTrace()
+    } finally {
+        if (is != null) {
+            try {
+                is.close()
+            } catch (Throwable tr) {
+//                tr.printStackTrace()
+            }
+        }
+    }
+
+    return properties
+}
