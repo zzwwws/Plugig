@@ -1,4 +1,10 @@
+buildscript {
+    apply from: 'script.gradle', to: buildscript
+}
+
 apply plugin: 'com.android.application'
+
+
 
 android {
     compileSdkVersion 23
@@ -12,6 +18,9 @@ android {
         versionName "1.0"
     }
     buildTypes {
+        debug{
+            applicationIdSuffix ".debug"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -30,3 +39,13 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.0.1'
 }
+
+apply from: 'split.gradle'
+apply from: 'utils.gradle'
+
+android.applicationVariants.all{variant->
+    tasks.all{task->
+        customizeSplitTask(variant, task)
+    }
+}
+
