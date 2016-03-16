@@ -49,6 +49,8 @@ void handleDex(ApplicationVariant variant, Task task){
     Collection<Task> outputs = new ArrayList<>()
 
     handleMultiDex(variant, dex, outputs, excludes, libraries)
+    // PLUGINS
+    handlePluginDex(variant, dex, outputs, excludes, libraries)
 
     handleMainDex(variant, dex, outputs, excludes, libraries)
 
@@ -57,9 +59,9 @@ void handleDex(ApplicationVariant variant, Task task){
 }
 void handleMultiDex(ApplicationVariant variant, Dex main, Collection<Task> outputs, Collection<String> excludes, Collection<File> libraries){
     // COMMON
-    outputs.add(createMultiDexTask(variant, main, 'plugin', { Jar jar, Dex dex ->
+    outputs.add(createMultiDexTask(variant, main, 'common', { Jar jar, Dex dex ->
         def INCLUDES = [
-                "com/github/zzwwws/plugig/plugin/",
+                "com/github/zzwwws/plugig/common/",
         ]
 
         jar.include(INCLUDES)
@@ -89,6 +91,14 @@ void handleMainDex(ApplicationVariant variant, Dex dex, Collection<Task> outputs
     outputs.add(jar)
 }
 
+void handlePluginDex(ApplicationVariant variant, Dex main, Collection<Task> outputs, Collection<String> excludes, Collection<File> libraries){
+    if(modules.contains('A')){
+        outputs.add(createPluginTaskEx(variant, main, 'A', excludes))
+    }
+    if(modules.contains('B')){
+        outputs.add(createPluginTaskEx(variant, main, 'B', excludes))
+    }
+}
 void copyDex(BaseVariant variant, Dex dex, int order) {
     copy {
         from new File(dex.outputFolder, "classes.dex")
@@ -193,6 +203,61 @@ void handlePackage(ApplicationVariant variant, Task task) {
 
     println "package dexfold -> ${pack.dexFolder.path}"
     task.dependsOn(createPackageCustomTask(variant))
+}
+
+Task createPluginTaskEx(BaseVariant variant, Dex main, String id, Collection<String> excludes) {
+    String include = "com/github/zzwwws/plugig/plugin/$id/"
+
+    excludes.add(include)
+
+    return createPluginTask(variant, main, id, { Jar jar, Dex dex ->
+        jar.include(include)
+    })
+}
+
+//
+// PLUGIN
+//
+
+Task createPluginTask(BaseVariant variant, Dex main, String id, Closure config) {
+    // JAR
+    Jar jar = createJarTask2(variant, id, main)
+
+    // DEX
+    Dex dex = createDexTask(variant, main, id)
+    dex.inputFiles.add(jar.getArchivePath())
+
+
+    // PACKAGE
+    Task pack = createPackagePluginTask(variant, dex, id)
+
+    chainDependsOn(pack, dex, jar)
+
+    copyDependsOn(main, jar)
+
+    // CONFIG
+    config(jar, dex)
+
+    println "pluginDex-> ${dex.name} copy end"
+    return pack
+}
+
+Task createPackagePluginTask(BaseVariant variant, Dex dex, String id) {
+    Jar task = tasks.create("package${id.capitalize()}${variant.name.capitalize()}", Jar.class)
+
+    task.baseName = id
+    task.from(dex.outputFolder)
+    println "dexoutput -> ${dex.outputFolder}"
+    task.destinationDir = file("${CUSTOM_PACKAGE}/${variant.dirName}/assets/preload")
+
+//    task.doLast {
+//        ant.checksum(file: task.getArchivePath(), property: id)
+//        ant.propertyfile(file: new File(task.destinationDir, task.getArchiveName() + ".vfy")) {
+//            entry( key: "MD5", value: "${ant.properties[id]}")
+//        }
+//    }
+
+    return task
 }
 
 Task createPackageCustomTask(BaseVariant variant) {

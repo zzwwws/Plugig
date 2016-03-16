@@ -1,0 +1,10 @@
+//
+// Modules
+//
+
+ext {
+    modules = [
+            'A',
+            'B',
+    ]
+}

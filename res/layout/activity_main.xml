@@ -10,8 +10,14 @@
 
     <Button
         android:layout_marginTop="30dp"
-        android:id="@+id/btn"
+        android:id="@+id/btn1"
         android:text="start a"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <Button
+        android:layout_marginTop="80dp"
+        android:id="@+id/btn2"
+        android:text="start plugin a"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </RelativeLayout>

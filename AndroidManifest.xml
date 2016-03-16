@@ -16,8 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".plugin.ActivityA"/>
-        <activity android:name=".plugin.ActivityB"/>
+        <activity android:name=".common.ActivityA"/>
+        <activity android:name=".common.ActivityB"/>
     </application>
 
 </manifest>

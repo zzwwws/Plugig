@@ -51,12 +51,14 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.1.1'
 }
-
+apply from: 'modules.gradle'
+apply from: 'module.gradle'
 apply from: 'split.gradle'
 apply from: 'utils.gradle'
 
 android.applicationVariants.all{variant->
     tasks.all{task->
+        customizeModuleTask(variant, task)
         customizeSplitTask(variant, task)
     }
 }

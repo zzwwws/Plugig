@@ -1,4 +1,4 @@
-package com.github.zzwwws.plugig.plugin;
+package com.github.zzwwws.plugig.common;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,15 +10,15 @@ import com.github.zzwwws.plugig.R;
 /**
  * Created by zzwwws on 2016/3/15.
  */
-public class ActivityA extends AppCompatActivity {
+public class ActivityB extends AppCompatActivity {
 
     public static void start(Context context){
-        Intent intent = new Intent(context, ActivityA.class);
+        Intent intent = new Intent(context, ActivityB.class);
         context.startActivity(intent);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_a);
+        setContentView(R.layout.activity_b);
     }
 }

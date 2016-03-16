@@ -1,0 +1,9 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView android:text="Plugin Activity A" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
+<!-- From: file:/C:/Users/Administrator/workspace/Plugig/project/A/res/layout/plugin_activity_a.xml -->

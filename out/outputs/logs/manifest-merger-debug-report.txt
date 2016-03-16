@@ -41,11 +41,11 @@ category#android.intent.category.LAUNCHER
 ADDED from AndroidManifest.xml:16:17
 	android:name
 		ADDED from AndroidManifest.xml:16:27
-activity#com.github.zzwwws.plugig.plugin.ActivityA
+activity#com.github.zzwwws.plugig.common.ActivityA
 ADDED from AndroidManifest.xml:19:9
 	android:name
 		ADDED from AndroidManifest.xml:19:19
-activity#com.github.zzwwws.plugig.plugin.ActivityB
+activity#com.github.zzwwws.plugig.common.ActivityB
 ADDED from AndroidManifest.xml:20:9
 	android:name
 		ADDED from AndroidManifest.xml:20:19

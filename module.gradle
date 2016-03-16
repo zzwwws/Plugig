@@ -1,0 +1,151 @@
+buildscript {
+    apply from: 'script.gradle', to: buildscript
+}
+
+//
+// Directory
+//
+
+ext {
+    MODULES_ROOT = "${project.rootDir}/project"
+}
+
+//
+// Modules
+//
+
+addModules()
+
+void addModule(String module) {
+    String root = "$MODULES_ROOT/$module";
+
+    android.sourceSets.main {
+        java.srcDir("$root/src")
+        res.srcDir("$root/res")
+    }
+
+    dependencies {
+        compile fileTree(dir: "$root/libs", include: '*.jar')
+    }
+}
+
+void addModules() {
+    for (String module : modules) {
+        addModule(module)
+    }
+}
+
+List<File> getModuleManifests() {
+    List<File> files = new ArrayList<File>()
+
+    for (String module : modules) {
+        files.add(file("$MODULES_ROOT/$module/AndroidManifest.xml"))
+    }
+
+    return files;
+}
+
+ext {
+    customizeModuleTask = { ApplicationVariant variant, Task task ->
+        customizeTasks(variant, task)
+    }
+}
+
+void customizeTasks(BaseVariant variant, Task task) {
+    if (task.name.equals("process${variant.name.capitalize()}Resources".toString())) {
+        handleProcessResources(variant, task, getModuleManifests())
+    }
+}
+
+//
+// Package Resources
+//
+
+void handleProcessResources(BaseVariant variant, Task task, List<File> manifestFiles) {
+    if (manifestFiles.isEmpty()) {
+        println "no manifests to merge"
+
+        return;
+    }
+
+    ProcessAndroidResources processResources = (ProcessAndroidResources) task
+
+    File manifestFile = processResources.manifestFile;
+    File manifestFile2 = new File(manifestFile.getParentFile(), "merge/${manifestFile.getName()}")
+
+    processResources.manifestFile = manifestFile2
+
+    InvokeManifestMerger merger = createManifestMergeTask("merge${variant.name.capitalize()}Manifest");
+
+    merger.mainManifestFile = manifestFile
+    merger.outputFile = manifestFile2
+    merger.secondaryManifestFiles = manifestFiles
+
+    copyDependsOn(processResources, merger)
+
+    processResources.dependsOn(merger)
+}
+
+void copyDependsOn(Task base, Task task) {
+    for (Object depend : base.dependsOn) {
+        task.dependsOn(depend)
+    }
+}
+
+//
+// Merge Manifest
+//
+
+import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.tasks.InvokeManifestMerger
+import com.android.build.gradle.tasks.ProcessAndroidResources
+import com.google.common.io.Files;
+import com.android.build.gradle.internal.LoggerWrapper
+import com.android.manifmerger.ManifestMerger2
+import com.android.manifmerger.MergingReport
+import com.android.utils.ILogger
+import org.apache.tools.ant.BuildException
+
+import java.nio.charset.Charset
+
+InvokeManifestMerger createManifestMergeTask(String name) {
+    InvokeManifestMerger merger = tasks.create(name, InvokeManifestMerger.class)
+
+    merger.doLast {
+        def merge = {
+            ILogger iLogger = new LoggerWrapper(getLogger());
+            ManifestMerger2.Invoker mergerInvoker = ManifestMerger2.
+                    newMerger(getMainManifestFile(), iLogger, ManifestMerger2.MergeType.APPLICATION)
+            mergerInvoker.addLibraryManifests(secondaryManifestFiles.toArray(new File[secondaryManifestFiles.size()]))
+            MergingReport mergingReport = mergerInvoker.merge();
+            if (mergingReport.result.isError()) {
+                getLogger().error(mergingReport.reportString);
+                mergingReport.log(iLogger);
+                throw new BuildException(mergingReport.reportString);
+            }
+            try {
+                Files.write(mergingReport.getMergedDocument().get().prettyPrint(), getOutputFile(), Charset.forName("UTF-8"));
+            } catch(IOException e) {
+                throw new RuntimeException(e);
+            }
+//            FileWriter fileWriter = null;
+//            try {
+//                fileWriter = new FileWriter(getOutputFile())
+//                fileWriter.append(mergingReport.getMergedDocument().get().prettyPrint())
+//            } finally {
+//                if (fileWriter != null) {
+//                    fileWriter.close()
+//                }
+//            }
+        }
+
+        if (!Charset.defaultCharset().equals(Charset.forName("UTF-8"))) {
+            println "default charset is not UTF-8"
+
+            getOutputFile().delete()
+
+            merge();
+        }
+    }
+}
