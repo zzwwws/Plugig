@@ -1,6 +1,7 @@
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
+.idea/
 .DS_Store
 # Built application files
 *.apk
@@ -20,6 +21,7 @@ gen/
 .gradle/
 build/
 
+*.properties
 # Local configuration file (sdk path, etc)
 local.properties
 
