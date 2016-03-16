@@ -1,11 +1,63 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     apply from: 'script.gradle', to: buildscript
 }
 
-allprojects {
-    repositories {
-        jcenter()
+apply plugin: 'com.android.application'
+
+
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+    buildDir "out"
+
+    defaultConfig {
+        applicationId "com.github.zzwwws.plugig"
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        debug{
+            applicationIdSuffix ".debug"
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+    dexOptions {
+        incremental true
+        preDexLibraries false
+        jumboMode true
+        javaMaxHeapSize '4G'
     }
 }
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:23.1.1'
+}
+
+apply from: 'split.gradle'
+apply from: 'utils.gradle'
+
+android.applicationVariants.all{variant->
+    tasks.all{task->
+        customizeSplitTask(variant, task)
+    }
+}
+
