@@ -1,5 +1,6 @@
 package com.github.zzwwws.plugig;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -8,12 +9,15 @@ import android.view.View;
 import android.widget.Button;
 
 import com.github.zzwwws.plugig.common.ActivityA;
-import com.github.zzwwws.plugig.plugin.A.APluginActivity;
+import com.github.zzwwws.plugig.compatible.ContextClassLoader;
+import com.github.zzwwws.plugig.plugin.IPlugin;
+import com.github.zzwwws.plugig.plugin.PluginManager;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     Button btn1;
     Button btn2;
+    ClassLoader ccl;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn2 = (Button)findViewById(R.id.btn2);
         btn1.setOnClickListener(this);
         btn2.setOnClickListener(this);
+
+        ccl = ContextClassLoader.init(this);
     }
 
     @Override
@@ -53,7 +59,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ActivityA.start(this);
                 break;
             case R.id.btn2:
-                APluginActivity.start(this);
+                IPlugin plugin = PluginManager.access(this, "A");
+                plugin.launch(this, new Intent());
                 break;
         }
     }

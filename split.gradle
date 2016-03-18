@@ -250,12 +250,12 @@ Task createPackagePluginTask(BaseVariant variant, Dex dex, String id) {
     println "dexoutput -> ${dex.outputFolder}"
     task.destinationDir = file("${CUSTOM_PACKAGE}/${variant.dirName}/assets/preload")
 
-//    task.doLast {
-//        ant.checksum(file: task.getArchivePath(), property: id)
-//        ant.propertyfile(file: new File(task.destinationDir, task.getArchiveName() + ".vfy")) {
-//            entry( key: "MD5", value: "${ant.properties[id]}")
-//        }
-//    }
+    task.doLast {
+        ant.checksum(file: task.getArchivePath(), property: id)
+        ant.propertyfile(file: new File(task.destinationDir, task.getArchiveName() + ".vfy")) {
+            entry( key: "MD5", value: "${ant.properties[id]}")
+        }
+    }
 
     return task
 }
